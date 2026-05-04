@@ -1,0 +1,116 @@
+
+<%- include('partials/header') %>
+<nav class="navbar navbar-expand-lg navbar-light bg-dark mb-4 border-bottom">
+    <div class="container">
+        <a class="navbar-brand fw-bold fs-3 text-white" href="/"><h2>Supermarket Admin</h2></a>
+        
+        <div class="collapse navbar-collapse d-flex justify-content-between">
+            <ul class="navbar-nav mb-2 mb-lg-0 align-items-center">
+                <li class="nav-item ms-lg-3 mt-2 mt-lg-0">
+                    <a class="btn btn-primary shadow-sm px-4" href="/add">Add New Product</a>
+                </li>
+            </ul>
+
+            <form action="/" method="GET" class="d-flex">
+                <input type="text" name="search" class="form-control me-2" placeholder="Search" value="<%= searchQuery %>">
+                <button type="submit" class="btn btn-outline-success">Search</button>
+                <% if(searchQuery) { %>
+                    <a href="/" class="btn btn-outline-secondary ms-2">Clear</a>
+                <% } %>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div id="alertBox" class="alert alert-success d-none" role="alert">
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th class="border-0 border-bottom">Name</th>
+                    <th class="border-0 border-bottom">Category</th>
+                    <th class="border-0 border-bottom">Price</th>
+                    <th class="border-0 border-bottom">Stock</th>
+                    <th class="border-0 border-bottom">Image</th>
+                    <th class="border-0 border-bottom">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% products.forEach(product => { %>
+                <tr>
+                    <td class="fw-bold"><%= product.name %></td>
+                    <td><%= product.category %></td>
+                    <td>฿<%= product.price %></td>
+                    <td>
+                        <% if(product.stock == 0) { %>
+                            <span class="badge bg-danger">Out of Stock</span>
+                        <% } else { %>
+                            <%= product.stock %>
+                        <% } %>
+                    </td>
+                    <td>
+                        <% if(product.image) { %>
+                            <img src="/uploads/<%= product.image %>" class="rounded-circle shadow-sm" style="width: 55px; height: 55px; object-fit: cover;">
+                        <% } else { %>
+                            <span class="text-muted">No Image</span>
+                        <% } %>
+                    </td>
+                    <td>
+                        <a href="/edit/<%= product.id %>" class="btn btn-warning btn-sm px-3">Edit</a>
+                        <button class="btn btn-danger btn-sm px-3" onclick="showDeleteModal('<%= product.id %>')">Delete</button>
+                    </td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold">Confirm Delete</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?</p>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+        <a href="#" id="confirmDeleteBtn" class="btn btn-danger px-4">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('partials/header') %>
+
+<script>
+    // จัดการ Alert Toast
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get('status');
+
+    if(status) {
+        const alertBox = document.getElementById('alertBox');
+        alertBox.classList.remove('d-none');
+        if (status === 'added') {
+            alertBox.innerText = 'Product added successfully!';
+        } else if (status === 'updated') {
+            alertBox.innerText = 'Product updated successfully!';
+        } else if (status === 'deleted') {
+            alertBox.innerText = 'Product deleted successfully!';
+        }
+        window.history.replaceState({}, document.title, "/"); 
+        setTimeout(() => alertBox.classList.add('d-none'), 3000);
+    }
+    function showDeleteModal(id) {
+        document.getElementById('confirmDeleteBtn').href = '/delete/' + id;
+        var myModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        myModal.show();
+    }
+</script>
+<%- include('partials/footer') %>
